@@ -1,9 +1,9 @@
-
 import React, { useState, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { clearCart } from '../redux/cartSlice';
+import API from '../api';
 
 const Checkout = () => {
   const { user } = useContext(AuthContext);
@@ -26,7 +26,7 @@ const Checkout = () => {
   const handlePayment = async () => {
     try {
       // STEP 1: Create Razorpay Order from Backend
-      const orderRes = await fetch('/api/payment/order', {
+      const orderRes = await fetch(`${API}/api/payment/order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -55,7 +55,7 @@ const Checkout = () => {
         handler: async function (response) {
           try {
             // Verify payment on Backend
-            const verifyRes = await fetch('/api/payment/verify', {
+            const verifyRes = await fetch(`${API}/api/payment/verify`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -69,7 +69,7 @@ const Checkout = () => {
             }
 
             // STEP 4: Save Order in Database
-            const saveOrderRes = await fetch('/api/orders', {
+            const saveOrderRes = await fetch(`${API}/api/orders`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
