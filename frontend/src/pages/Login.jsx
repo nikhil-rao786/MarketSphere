@@ -1,8 +1,10 @@
+
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import '../styles/auth.css';
 import API from '../api';
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +20,7 @@ const Login = () => {
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
+
       if (res.ok) {
         login(data);
         navigate('/');
