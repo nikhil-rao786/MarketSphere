@@ -1,29 +1,54 @@
+
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import API from '../api';
+
 const AdminOrders = () => {
   const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      fetch(`${API}/api/orders`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      const data = await res.json();
-      setOrders(Array.isArray(data) ? data : []);
+      try {
+        const res = await fetch(`${API}/api/orders`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+
+        const data = await res.json();
+        setOrders(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      }
     };
-    fetchOrders();
+
+    if (user?.token) {
+      fetchOrders();
+    }
   }, [user]);
 
   const updateStatus = async (id, status) => {
-    fetch(`${API}/api/orders/${id}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
-      body: JSON.stringify({ status })
-    });
-    if (res.ok) {
-      setOrders(orders.map(order => order._id === id ? { ...order, status } : order));
+    try {
+      const res = await fetch(`${API}/api/orders/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`
+        },
+        body: JSON.stringify({ status })
+      });
+
+      if (res.ok) {
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order._id === id ? { ...order, status } : order
+          )
+        );
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Failed to update order status');
+      }
+    } catch (error) {
+      console.error('Error updating order:', error);
     }
   };
 
@@ -49,8 +74,8 @@ const AdminOrders = () => {
                 <td style={tdStyle}>₹{order.totalAmount.toFixed(2)}</td>
                 <td style={tdStyle}>{new Date(order.createdAt).toLocaleDateString()}</td>
                 <td style={tdStyle}>
-                  <select 
-                    value={order.status} 
+                  <select
+                    value={order.status}
                     onChange={(e) => updateStatus(order._id, e.target.value)}
                     style={{ background: '#09090b', color: '#fff', padding: '6px', border: '1px solid #27272a', borderRadius: '4px', outline: 'none' }}
                   >
